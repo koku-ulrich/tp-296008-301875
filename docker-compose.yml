@@ -1,0 +1,54 @@
+# docker stack deploy -c stack.yml jupyter
+# optional pgadmin container
+version: "3.8"
+networks:
+  296008-301875:
+services:
+  dbMongo:
+    image: mongo
+    container_name: mongoDb
+    environment:
+      MONGO_INITDB_ROOT_DATABASE: supinfo
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: 1234
+    volumes:
+      - D:/5SUP/5data/Tp/data/mongodb:/data/db
+    networks:
+      - 296008-301875
+    ports:
+      - "5432:5432"
+    deploy:
+      restart_policy:
+        condition: on-failure
+  adminer:
+    container_name: adminer
+    image: adminer:latest
+    ports:
+      - "8080:8080/tcp"
+    networks:
+      - 296008-301875
+    deploy:
+      restart_policy:
+        condition: on-failure
+  spark:
+    container_name: spark
+    image: jupyter/all-spark-notebook:latest
+    ports:
+      - "8888:8888/tcp"
+    networks:
+      - 296008-301875
+    working_dir: /jupyter
+    environment:
+      CHOWN_HOME: "yes"
+      GRANT_SUDO: "yes"
+      NB_UID: 1000
+      NB_GID: 100
+      NB_USER: $USER
+      NB_GROUP: 296008-301875
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    volumes:
+      - D:/5SUP/5data/Tp/jupyter:/jupyter
+
